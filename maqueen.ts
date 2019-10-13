@@ -1,0 +1,159 @@
+﻿let maqueencb: Action
+let maqueenmycb: Action
+let maqueene = "1"
+let maqueenparam = 0
+let alreadyInit = 0
+let IrPressEvent = 0
+const MOTER_ADDRESSS = 0x10
+
+enum PingUnit {
+    
+//% block="cm"
+    Centimeters,
+    
+//% block="μs"
+    MicroSeconds
+}
+
+
+
+//% weight=10 color=#008B00 icon="\uf136" block="IR"
+namespace maqueen {
+
+    export class Packeta {
+        public mye: string;
+        public myparam: number;
+    }
+
+    export enum aMotors {
+        
+ 
+//% advanced=true shim=maqueenIR::initIR
+    function initIR(pin: Pins): void {
+        return
+    }
+    
+//% advanced=true shim=maqueenIR::onPressEvent
+    function onPressEvent(btn: RemoteButton, body: Action): void {
+        return
+    }
+    
+//% advanced=true shim=maqueenIR::getParam
+    function getParam(): number {
+        return 0
+    }
+
+    function maqueenInit(): void {
+        if (alreadyInit == 1) {
+            return
+        }
+        initIR(Pins.P16)
+        alreadyInit = 1
+    }
+
+
+
+    
+//% weight=100
+    
+//% blockGap=50
+    
+//% blockId=IR_callbackUser block="on IR received"
+    export function IR_callbackUser(maqueencb: (message: number) => void) {
+        maqueenInit();
+        IR_callback(() => {
+            const packet = new Packeta();
+            packet.mye = maqueene;
+            maqueenparam = getParam();
+            packet.myparam = maqueenparam;
+            maqueencb(packet.myparam);
+        });
+    }
+
+    
+//% weight=10
+    
+//% blockId=IR_read block="read IR"
+    export function IR_read(): number {
+        maqueenInit()
+        return getParam()
+    }
+
+    
+//% weight=10
+    
+//% blockId=IR_read_version block="Get product information"
+    export function IR_read_version(): string {
+        maqueenInit()
+        pins.i2cWriteNumber(0x10, 50, NumberFormat.UInt8BE);
+        let dataLen = pins.i2cReadNumber(0x10, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(0x10, 51, NumberFormat.UInt8BE);
+        let buf = pins.i2cReadBuffer(0x10, dataLen, false);
+        let version = "";
+        for (let index = 0; index < dataLen; index++) {
+            version += String.fromCharCode(buf[index])
+        }
+        return version
+    }
+
+    function IR_callback(a: Action): void {
+        maqueencb = a
+        IrPressEvent += 1
+        onPressEvent(IrPressEvent, maqueencb)
+    }
+
+    
+//% blockId=ultrasonic_sensor block="sensor unit|%unit"
+    
+//% weight=95
+    export function sensor(unit: PingUnit, maxCmDistance = 500): number {
+        
+// send pulse  basic.pause=sleep control.waitMicros=delay
+        pins.setPull(DigitalPin.P1, PinPullMode.PullNone);
+        pins.digitalWritePin(DigitalPin.P1, 0);
+        control.waitMicros(2);
+        pins.digitalWritePin(DigitalPin.P1, 1);
+        control.waitMicros(10);
+        pins.digitalWritePin(DigitalPin.P1, 0);
+        pins.setPull(DigitalPin.P2, PinPullMode.PullUp);
+
+
+
+        
+// read pulse
+        let d = pins.pulseIn(DigitalPin.P2, PulseValue.High, maxCmDistance * 42);
+        console.log("Distance: " + d / 42);
+
+        basic.pause(50)
+
+        let x = Math.round(d / 42);
+        let y = Math.round(d / 1);
+        switch (unit) {
+
+            case PingUnit.Centimeters: return x;
+            default: return y;
+        }
+    }
+
+    
+//% weight=90
+    
+       
+//% blockId=read_Patrol block="Read Patrol|%patrol"
+    
+//% patrol.fieldEditor="gridpicker" patrol.fieldOptions.columns=2 
+    export function readPatrol(patrol: Patrol): number {
+        if (patrol == Patrol.PatrolLeft) {
+            return pins.digitalReadPin(DigitalPin.P13)
+        } else if (patrol == Patrol.PatrolRight) {
+            return pins.digitalReadPin(DigitalPin.P14)
+        } else {
+            return -1
+        }
+    }
+
+    
+//% weight=20
+
+    
+    
