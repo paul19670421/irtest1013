@@ -25,8 +25,8 @@ namespace maqueen {
         public myparam: number;
     }
 
-    
-
+    export enum aMotors {
+        
 
 //% advanced=true shim=maqueenIR::initIR
     function initIR(pin: Pins): void {
@@ -57,7 +57,6 @@ namespace maqueen {
 //% weight=100
     
 //% blockGap=50
-
     
 //% blockId=IR_callbackUser block="on IR received"
     export function IR_callbackUser(maqueencb: (message: number) => void) {
@@ -80,10 +79,8 @@ namespace maqueen {
         return getParam()
     }
 
-    
-//% weight=10
-    
-//% blockId=IR_read_version block="Get product information"
+    //% weight=10
+    //% blockId=IR_read_version block="Get product information"
     export function IR_read_version(): string {
         maqueenInit()
         pins.i2cWriteNumber(0x10, 50, NumberFormat.UInt8BE);
@@ -103,12 +100,9 @@ namespace maqueen {
         onPressEvent(IrPressEvent, maqueencb)
     }
 
-    
-//% blockId=ultrasonic_sensor block="sensor unit|%unit"
-    
-//% weight=95
-    
-export function sensor(unit: PingUnit, maxCmDistance = 500): number {
+    //% blockId=ultrasonic_sensor block="sensor unit|%unit"
+    //% weight=95
+    export function sensor(unit: PingUnit, maxCmDistance = 500): number {
         // send pulse  basic.pause=sleep control.waitMicros=delay
         pins.setPull(DigitalPin.P1, PinPullMode.PullNone);
         pins.digitalWritePin(DigitalPin.P1, 0);
@@ -135,15 +129,19 @@ export function sensor(unit: PingUnit, maxCmDistance = 500): number {
         }
     }
 
+    //% weight=90
+    //% blockId=motor_MotorRun block="Motor|%index|dir|%Dir|speed|%speed"
+    //% speed.min=0 speed.max=255
+    //% index.fieldEditor="gridpicker" index.fieldOptions.columns=2
     
-//% weight=90
-    
+//% direction.fieldEditor="gridpicker" direction.fieldOptions.columns=2
+          
+//% blockId=motor_motorStopAll block="Motor Stop All"
+       
 
-        
     
 //% blockId=read_Patrol block="Read Patrol|%patrol"
-    
-//% patrol.fieldEditor="gridpicker" patrol.fieldOptions.columns=2 
+    //% patrol.fieldEditor="gridpicker" patrol.fieldOptions.columns=2 
     export function readPatrol(patrol: Patrol): number {
         if (patrol == Patrol.PatrolLeft) {
             return pins.digitalReadPin(DigitalPin.P13)
@@ -157,4 +155,39 @@ export function sensor(unit: PingUnit, maxCmDistance = 500): number {
     
 //% weight=20
     
+//% blockId=writeLED block="led|%led|ledswitch|%ledswitch"
     
+//% led.fieldEditor="gridpicker" led.fieldOptions.columns=2 
+   
+//% ledswitch.fieldEditor="gridpicker" ledswitch.fieldOptions.columns=2
+    export function writeLED(led: LED, ledswitch: LEDswitch): void {
+        if (led == LED.LEDLeft) {
+            pins.digitalWritePin(DigitalPin.P8, ledswitch)
+        } else if (led == LED.LEDRight) {
+            pins.digitalWritePin(DigitalPin.P12, ledswitch)
+        } else {
+            return
+        }
+    }
+
+    
+//% weight=90
+    
+//% blockId=servo_ServoRun block="Servo|%index|angle|%angle"
+    
+//% angle.min=0 angle.max=180
+    
+//% index.fieldEditor="gridpicker" index.fieldOptions.columns=2
+    export function ServoRun(index: aServos, angle: number): void {
+        let buf = pins.createBuffer(2);
+        if (index == 0) {
+            buf[0] = 0x14;
+        }
+        if (index == 1) {
+            buf[0] = 0x15;
+        }
+        buf[1] = angle;
+        pins.i2cWriteBuffer(0x10, buf);
+    }
+
+}
