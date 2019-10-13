@@ -17,7 +17,7 @@ enum PingUnit {
 
 
 
-//% weight=10 color=#008B00 icon="\uf136" block="IR"
+//% weight=10 color=#008B00 icon="\uf136" block="maqueen"
 namespace maqueen {
 
     export class Packeta {
@@ -25,9 +25,9 @@ namespace maqueen {
         public myparam: number;
     }
 
-    export enum aMotors {
-        
- 
+    
+
+
 //% advanced=true shim=maqueenIR::initIR
     function initIR(pin: Pins): void {
         return
@@ -57,6 +57,7 @@ namespace maqueen {
 //% weight=100
     
 //% blockGap=50
+
     
 //% blockId=IR_callbackUser block="on IR received"
     export function IR_callbackUser(maqueencb: (message: number) => void) {
@@ -106,9 +107,9 @@ namespace maqueen {
 //% blockId=ultrasonic_sensor block="sensor unit|%unit"
     
 //% weight=95
-    export function sensor(unit: PingUnit, maxCmDistance = 500): number {
-        
-// send pulse  basic.pause=sleep control.waitMicros=delay
+    
+export function sensor(unit: PingUnit, maxCmDistance = 500): number {
+        // send pulse  basic.pause=sleep control.waitMicros=delay
         pins.setPull(DigitalPin.P1, PinPullMode.PullNone);
         pins.digitalWritePin(DigitalPin.P1, 0);
         control.waitMicros(2);
@@ -119,8 +120,7 @@ namespace maqueen {
 
 
 
-        
-// read pulse
+        // read pulse
         let d = pins.pulseIn(DigitalPin.P2, PulseValue.High, maxCmDistance * 42);
         console.log("Distance: " + d / 42);
 
@@ -138,7 +138,9 @@ namespace maqueen {
     
 //% weight=90
     
-       
+
+        
+    
 //% blockId=read_Patrol block="Read Patrol|%patrol"
     
 //% patrol.fieldEditor="gridpicker" patrol.fieldOptions.columns=2 
@@ -154,6 +156,5 @@ namespace maqueen {
 
     
 //% weight=20
-
     
     
